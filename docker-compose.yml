@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: .
+    environment:
+      - VITE_API_URL=/api
+      - VITE_WS_URL=/ws
+      - VITE_PORT=4173
+      - VITE_HOST=${VITE_HOST:-0.0.0.0}
+    restart: unless-stopped
+    networks:
+      - zoraxy_easyvote
+
+  backend:
+    build: ./backend
+    environment:
+      - PORT=${PORT:-3001}
+      - HOST=${HOST:-0.0.0.0}
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL:-file:./polls.db}
+      - JWT_SECRET=${JWT_SECRET}
+      - FRONTEND_URL=${DOMAIN}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - SMTP_FROM=${SMTP_FROM}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - CLEANUP_INTERVAL=${CLEANUP_INTERVAL:-"0 0 * * *"}
+      - POLL_RETENTION_DAYS=${POLL_RETENTION_DAYS:-30}
+      - DEFAULT_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS:-900000}
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-100}
+      - ALLOWED_ORIGINS=http://localhost:4173,http://127.0.0.1:4173,https://vote.hacf.fr
+    volumes:
+      - /docker/easyvote/backend/polls.db:/app/polls.db
+    restart: unless-stopped
+    networks:
+      - zoraxy_easyvote
+
+networks:
+  zoraxy_easyvote:
+    external: true 

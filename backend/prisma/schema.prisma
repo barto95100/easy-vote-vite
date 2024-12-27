@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../polls.db"
+}
+
+model Poll {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  options     Option[]
+  expiresAt   DateTime
+  password    String    // SQLite gère automatiquement la longueur
+  isClosed    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  totalVotes  Int      @default(0)
+  reactions   Reaction?
+  settings    Settings?
+  theme       Theme?
+  maxVotes    Int?
+  votes     Vote[]
+  invitations PollInvitation[]
+  isPrivate   Boolean    @default(false)
+}
+
+model Option {
+  id      String @id @default(uuid())
+  text    String
+  votes   Int    @default(0)
+  color   String?
+  poll    Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollId  String
+  Vote    Vote[]
+}
+
+model Reaction {
+  id      String @id @default(uuid())
+  like    Int    @default(0)
+  love    Int    @default(0)
+  wow     Int    @default(0)
+  sad     Int    @default(0)
+  poll    Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollId  String @unique
+}
+
+model Settings {
+  id                String  @id @default(uuid())
+  showResults       Boolean @default(true)
+  allowMultipleVotes Boolean @default(false)
+  poll             Poll    @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollId           String  @unique
+}
+
+model Theme {
+  id              String @id @default(uuid())
+  primaryColor    String
+  backgroundColor String
+  textColor       String
+  poll            Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollId          String @unique
+}
+
+model Vote {
+  id          String   @id @default(uuid())
+  poll        Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollId      String
+  option      Option   @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  optionId    String
+  ip          String
+  userAgent   String
+  fingerprint String
+  createdAt   DateTime @default(now())
+
+  @@unique([pollId, fingerprint])
+}
+
+model PollInvitation {
+  id        String   @id @default(cuid())
+  pollId    String
+  email     String
+  token     String   @unique
+  status    String   @default("PENDING")
+  sentAt    DateTime @default(now())
+  votedAt   DateTime?
+  poll      Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, email])
+  @@index([token])
+} 
+
+model AdminSettings {
+  id            String   @id @default("default")
+  adminPassword String   // Mot de passe hashé
+  smtpHost      String?
+  smtpPort      Int?
+  smtpUser      String?
+  smtpPass      String?
+  smtpFrom      String?
+  smtpSecure    Boolean  @default(false)
+  smtpAuth      Boolean  @default(false)
+  updatedAt     DateTime @updatedAt
+} 
