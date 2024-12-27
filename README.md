@@ -67,7 +67,8 @@ SMTP_FROM=noreply@example.com
 
 - [Documentation Frontend](frontend-overview.md)
 - [Documentation Backend](backend-overview.md)
-- [Images Docker Hub](https://hub.docker.com/r/barto95100/easy-vote-vite-frontend)
+- [Images Docker Hub Frontend](https://hub.docker.com/r/barto95100/easy-vote-vite-frontend)
+- [Images Docker Hub Backend](https://hub.docker.com/r/barto95100/easy-vote-vite-backend)
 
 ## 📜 Licence
 
